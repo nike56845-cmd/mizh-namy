@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гра 18+</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .card-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 600px;
+    text-align: center;
+  }
+  .question {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+  }
+  .player {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 10px;
+    background: #ff3366;
+    color: #fff;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #ff5588;
+  }
+</style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="player" id="playerText">Передай гравцеві 1</div>
+  <div class="question" id="questionText">Натисни "Наступне питання", щоб почати гру.</div>
+  <button id="nextBtn">Наступне питання</button>
+</div>
+
+<script>
+// ================== МАСИВИ ПИТАНЬ ==================
+
+// 1️⃣ Масив всіх питань (allQuestions) - включає все, що було adultQuestions раніше
+const allQuestions = [
+"Коли ми залишаємося наодинці без телефонів, справ і відволікань, що ти насправді відчуваєш поруч зі мною — близькість, напругу чи змішання обох?",
+"У яких моментах наших стосунків ти поводишся обережніше, ніж хотів би, і що ти боїшся втратити, якщо будеш чесним до кінця?",
+"Що в нашій близькості для тебе є справжнім джерелом тепла, а що ти терпиш, щоб не порушити баланс між нами?",
+// ... сюди встав усі твої 300+ питань без скорочень ...
+];
+
+// 2️⃣ Масив тільки дорослих питань (adultQuestions)
+const adultQuestions = [
+"Як ти ставишся до шлюбного контракту? Чи повинен там бути окремий пункт про секс, сексуальні обов’язки, бажання та допустимі експерименти?",
+"Твоя найбожевільніша сексуальна фантазія зі мною, яку ти реально уявляв(-ла), але ще не наважився(-лася) озвучити?",
+"Розкажи детально про свій найкращий оргазм зі мною: що саме в тій ситуації, моїх діях або словах зробило його таким сильним?",
+// ... встав усі 150+ adult питань ...
+];
+
+// ================== ЛОГІКА ВИВОДУ ПИТАНЬ ==================
+
+let usedQuestions = [];
+let currentPlayer = 1;
+
+function getRandomQuestion() {
+  // вибрати питання, якого ще не було
+  const remainingQuestions = allQuestions.filter(q => !usedQuestions.includes(q));
+  if (remainingQuestions.length === 0) {
+    document.getElementById("questionText").innerText = "Всі питання вичерпані!";
+    return null;
+  }
+  const randomIndex = Math.floor(Math.random() * remainingQuestions.length);
+  const question = remainingQuestions[randomIndex];
+  usedQuestions.push(question);
+  return question;
+}
+
+// кнопка "Наступне питання"
+document.getElementById("nextBtn").addEventListener("click", () => {
+  const question = getRandomQuestion();
+  if (!question) return;
+  document.getElementById("questionText").innerText = question;
+
+  // черга гравця
+  document.getElementById("playerText").innerText = `Передай гравцеві ${currentPlayer}`;
+  currentPlayer = currentPlayer === 1 ? 2 : 1; // чергування 1 і 2
+});
+</script>
+
+</body>
+</html>
