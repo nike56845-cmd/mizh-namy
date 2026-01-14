@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Між нами</title>
+<style>
+:root{
+  --bg:#050507;
+  --card:#0d0d12;
+  --gold:#d4af37;
+  --text:#f4f4f4;
+  --muted:#9b9b9b;
+}
+body.soft{--card:#15151f;}
+body.passion{--card:#1a0b12; --gold:#e05c7a;}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at top,#14141d,#050507);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto;
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+}
+.app{
+  width:100%;
+  max-width:480px;
+  padding:20px 16px 28px;
+}
+h1{
+  text-align:center;
+  font-weight:500;
+  letter-spacing:.08em;
+  color:var(--gold);
+  margin-bottom:20px;
+}
+.modes{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+}
+button{
+  flex:1;
+  padding:14px 12px;
+  border-radius:18px;
+  border:1px solid #2b2b36;
+  background:linear-gradient(180deg,#12121a,#0a0a10);
+  color:var(--gold);
+  font-size:14px;
+  letter-spacing:.03em;
+}
+button:active{transform:scale(.97);} 
+.card{
+  background:linear-gradient(180deg,#14141d,#0b0b12);
+  border:1px solid #2b2b36;
+  border-radius:26px;
+  padding:28px 22px;
+  min-height:240px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:18px;
+  line-height:1.55;
+  box-shadow:0 30px 70px rgba(0,0,0,.65);
+  animation:cardIn .45s ease;
+}
+@keyframes cardIn{
+  from{opacity:0; transform:translateY(16px) scale(.98);} 
+  to{opacity:1; transform:none;} 
+}
+.actions{margin-top:18px;}
+.actions button{width:100%;}
+@media(max-width:380px){
+  .card{font-size:16px; min-height:220px; padding:22px 18px;}
+}
+</style>
+</head>
+<body class="soft">
+<div class="app">
+<h1>Між нами</h1>
+<div class="modes">
+  <button onclick="setMode('all')">Про все</button>
+  <button onclick="setMode('adult')">18+</button>
+  <button onclick="setMode('mix')">Мікс</button>
+</div>
+<div class="modes">
+  <button onclick="toggleSound()" id="soundBtn">🔊 Звук: увімк</button>
+  <button onclick="setStyle('soft')">Ніжний</button>
+  <button onclick="setStyle('passion')">Пристрасть</button>
+</div>
+<div id="card" class="card">Обери режим гри</div>
+<div id="counter" style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">0 / 0</div>
+<div class="actions">
+  <button onclick="nextStep()">Наступне</button>
+</div>
+</div>
+<script>
+// --- звук і тактильність ---
+let soundOn = true;
+const clickAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=');
+function haptic(){
+  if(navigator.vibrate) navigator.vibrate(20);
+  if(soundOn){
+    clickAudio.currentTime = 0;
+    clickAudio.play().catch(()=>{});
+  }
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('soundBtn').innerText = soundOn ? '🔊 Звук: увімк' : '🔇 Звук: вимк';
+}
+
+// --- стилі ---
+function setStyle(s){
+  document.body.classList.remove('soft','passion');
+  document.body.classList.add(s);
+}
+
+// --- питання (заглушки, ти заміниш на повні масиви) ---
+const allQuestions = Array.from({length:161},(_,i)=>`Питання №${i+1}. Загальна тема для глибокої розмови.`);
+const adultQuestions = Array.from({length:150},(_,i)=>`18+ питання №${i+1}. Інтимна доросла тема для пари.`);
+
+// --- логіка гри ---
+let mode = null;
+let list = [];
+let index = 0;
+let player = 1;
+let phase = 'question'; // question | pass
+
+function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+
+function setMode(m){
+  haptic();
+  mode = m;
+  index = 0;
+  player = 1;
+  phase = 'question';
+  if(m==='all') list = shuffle(allQuestions);
+  if(m==='adult') list = shuffle(adultQuestions);
+  if(m==='mix') list = shuffle([...allQuestions, ...adultQuestions]);
+  updateCounter();
+  showQuestion();
+}
+
+function animate(){
+  const c = document.getElementById('card');
+  c.style.animation='none';
+  c.offsetHeight;
+  c.style.animation='cardIn .45s ease';
+}
+
+function updateCounter(){
+  document.getElementById('counter').innerText = `${index+1} / ${list.length}`;
+}
+
+function showQuestion(){
+  animate();
+  document.getElementById('card').innerText = list[index];
+  updateCounter();
+}
+
+function nextStep(){
+  haptic();
+  const card = document.getElementById('card');
+  animate();
+  if(!mode){ card.innerText = 'Спочатку обери режим'; return; }
+
+  if(phase === 'question'){
+    card.innerText = 'Передай гравцеві ' + player;
+    phase = 'pass';
+  } else {
+    player = player === 1 ? 2 : 1;
+    index = (index + 1) % list.length;
+    card.innerText = list[index];
+    phase = 'question';
+    updateCounter();
+  }
+}
+</script>
+</body>
+</html>
